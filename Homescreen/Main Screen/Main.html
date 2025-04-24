@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UEFA Ticketverkauf</title>
+    <link rel="stylesheet" href="./Main.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <svg class="logo" viewBox="0 0 150 45" fill="white">
+                <text x="0" y="30" font-size="30" font-weight="bold">UEFA</text>
+            </svg>
+            <h1>Ticket Portal</h1>
+        </div>
+        <div>
+            <a href="../Profile/updatingProfile.html" class="profile">Profil bearbeiten</a>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="ticket-options">
+            <div class="option-card" onclick="selectOption('fcfs')">
+                <div class="option-icon">🏃</div>
+                <h2>First Come, First Served</h2>
+                <p>Sichere dir dein Ticket sofort! Verfügbare Tickets werden in Echtzeit vergeben, solange der Vorrat reicht.</p>
+                <a class="btn" href="../FCFS/FCFS.html">FCFS auswählen</a>
+            </div>
+            
+            <div class="option-card" onclick="selectOption('application')">
+                <div class="option-icon">📝</div>
+                <h2>Ticketbewerbung</h2>
+                <p>Bewirb dich für Tickets in der Bewerbungsphase und erhalte eine Benachrichtigung über deine Zuteilung.</p>
+                <a class="btn" href="../Bewerbung/bewerbung.html">Bewerbung auswählen</a>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 UEFA. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+    
+    <script>
+        function selectOption(option) {
+            if (option === 'fcfs') {
+                alert('Du hast First Come, First Served ausgewählt. Du wirst zur Ticketauswahl weitergeleitet...');
+                // Hier würde die Weiterleitung zur FCFS-Seite erfolgen
+            } else if (option === 'application') {
+                alert('Du hast die Ticketbewerbung ausgewählt. Du wirst zum Bewerbungsformular weitergeleitet...');
+                // Hier würde die Weiterleitung zur Bewerbungsseite erfolgen
+            }
+        }
+    </script>
+</body>
+</html>

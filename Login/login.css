@@ -1,0 +1,248 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f0f0f0;
+}
+
+.header {
+    background-color: #000;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
+    text-decoration: none;
+}
+
+.language-selector {
+    padding: 5px 10px;
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.my-uefa-container {
+    background-color: #e8ebf8;
+    padding: 40px;
+    flex: 1;
+    border-radius: 5px;
+    margin-right: 20px;
+}
+
+.my-uefa-logo {
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #0e1e5b;
+}
+
+.headline {
+    font-size: 28px;
+    color: #0e1e5b;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+.benefits-list {
+    list-style-type: none;
+    margin-bottom: 40px;
+}
+
+.benefits-list li {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.benefits-list li::before {
+    content: "•";
+    color: #0e1e5b;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.access-text {
+    color: #0e1e5b;
+    margin-bottom: 15px;
+}
+
+.app-icons {
+    display: flex;
+    gap: 10px;
+}
+
+.app-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #0e1e5b;
+    border-radius: 8px;
+}
+
+.and-more {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #0e1e5b;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-container {
+    flex: 1;
+    padding: 40px 0;
+}
+
+.login-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.social-button {
+    padding: 12px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.facebook-button {
+    background-color: #3b5998;
+}
+
+.google-button {
+    background-color: white;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.apple-button {
+    background-color: black;
+}
+
+.or-divider {
+    text-align: center;
+    margin: 20px 0;
+    color: #777;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #777;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.password-container {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    cursor: pointer;
+    color: #777;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.forgot-password {
+    color: #0066cc;
+    text-decoration: none;
+    margin-left: auto;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.new-account-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.new-account-divider {
+    border-top: 1px solid #ccc;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.new-account-text {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 0 10px;
+    color: #777;
+}
+
+.create-account-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: white;
+    color: #0066cc;
+    border: 1px solid #0066cc;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    margin-top: 15px;
+}

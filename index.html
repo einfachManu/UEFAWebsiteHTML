@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UEFA.com Login</title>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ" async defer></script>
 </head>
 <body>
     <header class="header">
@@ -88,7 +89,7 @@
                     <a href="#" class="forgot-password">Ich habe mein Passwort vergessen</a>
                 </div>
                 
-                <a href="../Homescreen/Main Screen/Main.html" class="submit-button">Abschicken</button>
+                <a href="./Homescreen/Main Screen/Main.html" class="submit-button">Abschicken</button>
             </form>
             
             <div class="new-account-section">
@@ -115,11 +116,20 @@
                 togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
             });
             
-            // Form submission (prevent default for demo)
-            const form = document.querySelector('form');
+            const form = document.getElementById('loginForm');
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                alert('Login attempt registered');
+                // Honeypot check
+                if (form.hp_email.value) {
+                    return alert('Bot erkannt');
+                }
+                // reCAPTCHA v3 token
+                grecaptcha.ready(() => {
+                    grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' }).then(token => {
+                        document.getElementById('recaptchaToken').value = token;
+                        form.submit();
+                    });
+                });
             });
         });
     </script>

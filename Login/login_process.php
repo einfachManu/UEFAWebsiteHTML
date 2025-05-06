@@ -20,11 +20,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 if ($password === '') {
   $errors .= "Passwort darf nicht leer sein. ";
 }
-if ($hp !== '') {
-  // Honeypot gefüllt → Bot
-  echo json_encode(['success' => false, 'error' => 'Bot erkannt.']);
-  exit;
-}
+
 if ($errors !== '') {
   echo json_encode(['success' => false, 'error' => trim($errors)]);
   exit;

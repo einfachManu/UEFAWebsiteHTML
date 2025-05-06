@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UEFA.com Login</title>
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
     <header class="header">
@@ -69,7 +69,7 @@
             
             <div class="or-divider">oder</div>
             
-            <form>
+            <form id="loginForm" action="/login" method="post">
                 <div class="form-group">
                     <label class="form-label">E-Mail</label>
                     <input type="email" class="form-control" value="manuel.schwarz1811@gmail.com">
@@ -88,8 +88,8 @@
                     <label for="remember" style="margin-left: 5px;">Angemeldet bleiben</label>
                     <a href="#" class="forgot-password">Ich habe mein Passwort vergessen</a>
                 </div>
-                
-                <a href="./Homescreen/Main Screen/Main.html" class="submit-button">Abschicken</button>
+                <input type="hidden" id="recaptchaToken" name="recaptchaToken">
+                <button type="submit" class="submit-button">Abschicken</button>
             </form>
             
             <div class="new-account-section">
@@ -107,25 +107,27 @@
             const togglePassword = document.querySelector('.toggle-password');
             const passwordInput = document.querySelector('input[type="password"]');
             
-
-
-
             togglePassword.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
                 togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
             });
             
+            // Korrigierter Form-Handling-Code
             const form = document.getElementById('loginForm');
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                
                 // Honeypot check
-                if (form.hp_email.value) {
+                const honeypot = document.getElementById('hp_email');
+                if (honeypot && honeypot.value) {
                     return alert('Bot erkannt');
                 }
+                
                 // reCAPTCHA v3 token
-                grecaptcha.ready(() => {
-                    grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' }).then(token => {
+                grecaptcha.ready(function() {
+                    grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' })
+                    .then(function(token) {
                         document.getElementById('recaptchaToken').value = token;
                         form.submit();
                     });

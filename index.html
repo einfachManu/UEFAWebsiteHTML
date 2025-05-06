@@ -73,7 +73,7 @@
             
             <div class="or-divider">oder</div>
             
-            <form id="loginForm" method="post" action="login_process.php">
+            <form id="loginForm" >
                 <div class="form-group">
                     <label class="form-label">E-Mail</label>
                     <input type="email" name="email" class="form-control" value="manuel.schwarz1811@gmail.com">
@@ -101,7 +101,7 @@
                 <button type="button" class="submit-button g-recaptcha" 
                     data-sitekey="6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ" 
                     data-callback="onSubmit" 
-                    data-action="login">Abschicken</button>
+                    data-action="submit">Abschicken</button>
             </form>
             
             <div class="new-account-section">
@@ -117,7 +117,7 @@
         // Callback-Funktion, die vom reCAPTCHA aufgerufen wird
         function onSubmit(token) {
             // Token ins versteckte Feld übertragen
-            document.getElementById('g-recaptcha-response').value = token;
+            document.getElementById('loginForm').submit();
             
             // Honeypot-Check
             if (document.getElementById('hp_email').value) {
@@ -128,7 +128,7 @@
             }
             
             // Formular absenden
-            document.getElementById('loginForm').submit();
+            
         }
         
         document.addEventListener('DOMContentLoaded', function() {

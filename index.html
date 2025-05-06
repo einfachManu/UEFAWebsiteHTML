@@ -70,7 +70,7 @@
             
             <div class="or-divider">oder</div>
             
-            <form id="loginForm" >
+            <form id="loginForm" action ="verify.php">
                 <div class="form-group">
                     <label class="form-label">E-Mail</label>
                     <input type="email" name="email" class="form-control" value="manuel.schwarz1811@gmail.com">
@@ -111,10 +111,9 @@
                 </div>
                 
                 <!-- Verstecktes Feld für reCAPTCHA-Token -->
-                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
-                <input type="hidden" name="submit_frm" value="1">
+                <input type="hidden" name="recaptcha_token" id="recaptcha_token">
                 
-                <!-- Submit-Button mit reCAPTCHA -->
+             
                 <button type="button" class="submit-button g-recaptcha" 
                     data-sitekey="6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ" 
                     data-callback="onSubmit" 
@@ -130,12 +129,16 @@
             </div>
         </div>
     </div>
-
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ"></script>
     <script>
-        // Callback-Funktion, die vom reCAPTCHA aufgerufen wird
+        grecaptcha.ready(function() {
+            grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', {action: 'login'}).then(function(token) {
+                document.getElementById('recaptcha_token').value = token;
+            });
+        });
         function onSubmit(token) {
             // Token ins versteckte Feld übertragen
-            document.getElementById('loginForm').submit();
+            
             
             // Honeypot-Check
             if (document.getElementById('hp_email').value) {
@@ -161,58 +164,7 @@
             });
             
             // Formular-Übermittlung mit reCAPTCHA
-            document.getElementById('loginForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                try {
-                    // Laden-Animation starten (optional)
-                    document.querySelector('.submit-button').disabled = true;
-                    document.querySelector('.submit-button').textContent = 'Wird geladen...';
-                    
-                    // reCAPTCHA Token generieren
-                    const token = await grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' });
-                    document.getElementById('recaptchaToken').value = token;
-                    
-                    // FormData für den Request erstellen
-                    const formData = new FormData(this);
-                    
-                    // Anfrage an den Server senden
-                    const response = await fetch('Login/login_process.php', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    // Antwort verarbeiten
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Bei Erfolg: Zum Hauptbildschirm weiterleiten
-                        window.location.href = './Homescreen/Main%20Screen/Main.html';
-                    } else {
-                        // Bei Fehler: Fehlermeldung anzeigen
-                        showError(data.error || 'Ein unbekannter Fehler ist aufgetreten.');
-                    }
-                } catch (error) {
-                    // Bei JavaScript-Fehler
-                    console.error('Fehler:', error);
-                    showError('Ein technischer Fehler ist aufgetreten. Bitte versuche es später erneut.');
-                } finally {
-                    // Button zurücksetzen
-                    document.querySelector('.submit-button').disabled = false;
-                    document.querySelector('.submit-button').textContent = 'Abschicken';
-                }
-            });
-        });
-        
-        // reCAPTCHA bei jeder Seiten-Interaktion aktualisieren (optional)
-        document.addEventListener('click', function() {
-            if (typeof grecaptcha !== 'undefined') {
-                grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' })
-                    .then(function(token) {
-                        document.getElementById('recaptchaToken').value = token;
-                    });
-            }
-        });
+        })
     </script>
 </body>
 </html>

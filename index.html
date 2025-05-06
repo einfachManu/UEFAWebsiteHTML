@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UEFA.com Login</title>
-    <!-- Google reCAPTCHA v3 API laden -->
-    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <!-- Google reCAPTCHA v3 API einbinden -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ"></script>
 </head>
 <body>
     <header class="header">
@@ -16,10 +16,7 @@
     
     <div class="container">
         <div class="my-uefa-container">
-            <div style="position: absolute; left: -9999px; top: -9999px;">
-                <label for="hp_email">Nicht ausfüllen</label>
-                <input type="text" id="hp_email" name="hp_email" autocomplete="off" tabindex="-1">
-            </div>
+            
             <div class="my-uefa-logo">MY UEFA</div>
             
             <h1 class="headline">Schließe dich noch heute 43 Millionen Fußballfans an</h1>
@@ -47,8 +44,8 @@
         <div class="login-container">
             <h2 class="login-title">Einloggen</h2>
             
-            <!-- Status-Nachricht für Formular-Feedback -->
-            <div id="statusMsg" class="status-msg" style="display: none;"></div>
+            <!-- Fehlermeldungsbereich -->
+            <div id="errorMessage" class="error-message" style="display: none; color: red; margin-bottom: 15px;"></div>
             
             <div class="social-buttons">
                 <a href="#" class="social-button facebook-button">
@@ -79,14 +76,34 @@
                     <input type="email" name="email" class="form-control" value="manuel.schwarz1811@gmail.com">
                 </div>
                 
+                <!-- E-Mail Feld -->
                 <div class="form-group">
-                    <label class="form-label">Passwort</label>
+                    <label for="email" class="form-label">E-Mail</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      class="form-control"
+                      required
+                      value=""/>
+                </div>
+                
+                <!-- Passwort Feld -->
+                <div class="form-group">
+                    <label for="password" class="form-label">Passwort</label>
                     <div class="password-container">
-                        <input type="password" name="password" class="form-control" value="••••••••">
+                        <input
+                          type="password"
+                          id="password"
+                          name="password"
+                          class="form-control"
+                          required
+                          value=""/>
                         <span class="toggle-password">👁️</span>
                     </div>
                 </div>
                 
+                <!-- Angemeldet bleiben und Passwort vergessen -->
                 <div class="remember-me">
                     <input type="checkbox" id="remember" name="remember" checked>
                     <label for="remember" style="margin-left: 5px;">Angemeldet bleiben</label>
@@ -104,6 +121,7 @@
                     data-action="submit">Abschicken</button>
             </form>
             
+            <!-- Registrierung -->
             <div class="new-account-section">
                 <div class="new-account-divider">
                     <span class="new-account-text">Neu bei UEFA?</span>
@@ -141,6 +159,59 @@
                 passwordInput.setAttribute('type', type);
                 togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
             });
+            
+            // Formular-Übermittlung mit reCAPTCHA
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                try {
+                    // Laden-Animation starten (optional)
+                    document.querySelector('.submit-button').disabled = true;
+                    document.querySelector('.submit-button').textContent = 'Wird geladen...';
+                    
+                    // reCAPTCHA Token generieren
+                    const token = await grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' });
+                    document.getElementById('recaptchaToken').value = token;
+                    
+                    // FormData für den Request erstellen
+                    const formData = new FormData(this);
+                    
+                    // Anfrage an den Server senden
+                    const response = await fetch('Login/login_process.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    // Antwort verarbeiten
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Bei Erfolg: Zum Hauptbildschirm weiterleiten
+                        window.location.href = './Homescreen/Main%20Screen/Main.html';
+                    } else {
+                        // Bei Fehler: Fehlermeldung anzeigen
+                        showError(data.error || 'Ein unbekannter Fehler ist aufgetreten.');
+                    }
+                } catch (error) {
+                    // Bei JavaScript-Fehler
+                    console.error('Fehler:', error);
+                    showError('Ein technischer Fehler ist aufgetreten. Bitte versuche es später erneut.');
+                } finally {
+                    // Button zurücksetzen
+                    document.querySelector('.submit-button').disabled = false;
+                    document.querySelector('.submit-button').textContent = 'Abschicken';
+                }
+            });
+        });
+        
+        // reCAPTCHA bei jeder Seiten-Interaktion aktualisieren (optional)
+        document.addEventListener('click', function() {
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' })
+                    .then(function(token) {
+                        document.getElementById('recaptchaToken').value = token;
+                    });
+            }
         });
     </script>
 </body>

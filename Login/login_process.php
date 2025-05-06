@@ -1,105 +1,131 @@
 <?php
+// Aktiviere Fehlermeldungen während der Entwicklung
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// Helper-Funktion für Console-Logs (Debugging)
+function console_log($data) {
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+    echo "<script>console.log({$json});</script>";
+}
+
 // Google reCAPTCHA v3 API Einstellungen
-$secretKey = '6LdZLiQrAAAAAOW87kWekFUxEb-cvbQpCVhocsJg'; // Ersetzen mit deinem Secret Key
+$secretKey = '6LdZLiQrAAAAAOW87kWekFUxEb-cvbQpCVhocsJg'; // Dein Secret Key
 
 // Standardwertzuweisungen
-$valErr = $statusMsg = $api_error = '';
-$status = 'error';
+$response = [
+    'success' => false,
+    'error' => '',
+    'debug' => []
+];
+
+// Header für JSON-Antwort setzen
+header('Content-Type: application/json');
 
 // Wenn das Formular abgeschickt wurde
-if(isset($_POST['submit_frm'])) {
+if(isset($_POST['email'])) {
     // Formulardaten abrufen
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
     $remember = isset($_POST['remember']) ? 1 : 0;
+    $recaptchaToken = $_POST['g-recaptcha-response'] ?? '';
     
     // Eingabefelder validieren
     if(empty($email) || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-        $valErr .= 'Bitte gib eine gültige E-Mail-Adresse ein.<br/>';
+        $response['error'] = 'Bitte gib eine gültige E-Mail-Adresse ein.';
+        echo json_encode($response);
+        exit();
     }
+    
     if(empty($password)) {
-        $valErr .= 'Bitte gib dein Passwort ein.<br/>';
+        $response['error'] = 'Bitte gib dein Passwort ein.';
+        echo json_encode($response);
+        exit();
     }
     
     // Honeypot-Check (zusätzliche Sicherheit)
     if(!empty($_POST['hp_email'])) {
-        // Wahrscheinlich ein Bot - abbrechen ohne Fehlermeldung
+        // Wahrscheinlich ein Bot - abbrechen ohne spezifische Fehlermeldung
+        $response['error'] = 'Ungültige Anfrage.';
+        echo json_encode($response);
         exit();
     }
     
-    // Überprüfen, ob Eingabedaten gültig sind
-    if(empty($valErr)) {
-        // reCAPTCHA-Antwort validieren
-        if(!empty($_POST['g-recaptcha-response'])) {
-            
-            // Google reCAPTCHA-Überprüfungs-API-Anfrage
-            $api_url = 'https://www.google.com/recaptcha/api/siteverify';
-            $resq_data = array(
-                'secret' => $secretKey,
-                'response' => $_POST['g-recaptcha-response'],
-                'remoteip' => $_SERVER['REMOTE_ADDR']
-            );
-            
-            $curlConfig = array(
-                CURLOPT_URL => $api_url,
-                CURLOPT_POST => true,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POSTFIELDS => $resq_data,
-                CURLOPT_SSL_VERIFYPEER => false
-            );
-            
-            $ch = curl_init();
-            curl_setopt_array($ch, $curlConfig);
-            $response = curl_exec($ch);
-            if(curl_errno($ch)) {
-                $api_error = curl_error($ch);
-            }
+    // reCAPTCHA-Antwort validieren
+    if(!empty($recaptchaToken)) {
+        // Google reCAPTCHA-Überprüfungs-API-Anfrage
+        $api_url = 'https://www.google.com/recaptcha/api/siteverify';
+        $request_data = [
+            'secret' => $secretKey,
+            'response' => $recaptchaToken,
+            'remoteip' => $_SERVER['REMOTE_ADDR']
+        ];
+        
+        $curlConfig = [
+            CURLOPT_URL => $api_url,
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POSTFIELDS => $request_data,
+            CURLOPT_SSL_VERIFYPEER => true  // In Produktion sollte dies true sein
+        ];
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, $curlConfig);
+        $curl_response = curl_exec($ch);
+        
+        if(curl_errno($ch)) {
+            $response['error'] = 'Fehler bei der Sicherheitsüberprüfung: ' . curl_error($ch);
+            $response['debug']['curl_error'] = curl_error($ch);
+            echo json_encode($response);
             curl_close($ch);
+            exit();
+        }
+        
+        curl_close($ch);
+        
+        // JSON-Daten der API-Antwort decodieren
+        $responseData = json_decode($curl_response);
+        $response['debug']['recaptcha_response'] = $responseData;
+        
+        // Wenn die reCAPTCHA-API-Antwort gültig ist
+        if(!empty($responseData) && $responseData->success) {
+            // Überprüfe den Score (0.0 ist wahrscheinlich ein Bot, 1.0 ist wahrscheinlich ein Mensch)
+            $score = $responseData->score;
+            $response['debug']['score'] = $score;
             
-            // JSON-Daten der API-Antwort im Array decodieren
-            $responseData = json_decode($response);
-            
-            // Wenn die reCAPTCHA-API-Antwort gültig ist
-            if(!empty($responseData) && $responseData->success) {
-                // Überprüfe auch den Score (optional)
-                $score = $responseData->score;
+            // Score-Schwellenwert (anpassen nach Bedarf, 0.5 ist ein guter Startpunkt)
+            if($score >= 0.5) {
+                // Hier deine eigene Login-Logik implementieren
+                // z.B. Datenbankabfrage für Benutzervalidierung
                 
-                // Ein niedriger Score deutet auf einen Bot hin
-                if($score >= 0.5) {
-                    // Hier kannst du deine eigene Login-Logik implementieren
-                    // z.B. Datenbankabfrage für Benutzervalidierung
-                    
-                    // Beispiel: Simulierte erfolgreiche Anmeldung
-                    $status = 'success';
-                    
-                    // Hier könntest du Session starten, Benutzer in Datenbank suchen usw.
-                    // session_start();
-                    // $_SESSION['user_id'] = $user_id;
-                    
-                    // Weiterleitung zur Hauptseite nach erfolgreichem Login
-                    header("Location: ./Homescreen/Bewerbung/bewerbung.html");
-                    exit();
-                } else {
-                    // Score ist zu niedrig - wahrscheinlich ein Bot
-                    $statusMsg = 'Die Sicherheitsüberprüfung wurde nicht bestanden. Bitte versuche es später erneut.';
-                }
+                // Simulierte Anmeldung für dieses Beispiel
+                $response['success'] = true;
+                echo json_encode($response);
+                exit();
+                
+                // In einer echten Anwendung:
+                // 1. Überprüfe Benutzeranmeldedaten in der Datenbank
+                // 2. Setze Session-Variablen
+                // 3. Sende Erfolgsantwort zurück
             } else {
-                $statusMsg = !empty($api_error) ? $api_error : 'Die reCAPTCHA-Überprüfung ist fehlgeschlagen, bitte versuche es erneut.';
+                // Score ist zu niedrig - wahrscheinlich ein Bot
+                $response['error'] = 'Die Sicherheitsüberprüfung wurde nicht bestanden. Bitte versuche es später erneut.';
+                echo json_encode($response);
+                exit();
             }
         } else {
-            $statusMsg = 'Etwas ist schief gelaufen, bitte versuche es erneut.';
+            $response['error'] = 'Die reCAPTCHA-Überprüfung ist fehlgeschlagen, bitte versuche es erneut.';
+            echo json_encode($response);
+            exit();
         }
     } else {
-        $valErr = !empty($valErr) ? '<br/>'.trim($valErr, '<br/>') : '';
-        $statusMsg = 'Bitte fülle alle Pflichtfelder aus:' . $valErr;
+        $response['error'] = 'reCAPTCHA-Token fehlt. Bitte aktualisiere die Seite und versuche es erneut.';
+        echo json_encode($response);
+        exit();
     }
-    
-    // Wenn wir hierher gelangen, gab es einen Fehler - zur Login-Seite zurückleiten mit Fehlermeldung
-    header("Location: index.html?error=" . urlencode($statusMsg));
+} else {
+    $response['error'] = 'Ungültige Anfrage. Bitte verwende das Login-Formular.';
+    echo json_encode($response);
     exit();
 }
-
-// Falls jemand direkt auf diese Seite zugreift, leite zur Login-Seite um
-header("Location: index.html");
-exit();
 ?>

@@ -1,4 +1,13 @@
+
+
 <?php
+function console_log($data) {
+    // Für komplexe Daten zuerst in JSON umwandeln
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+    // Dann ein <script> ausgeben, das im Browser console.log() aufruft
+    echo "<script>console.log({$json});</script>";
+}
+
 // Google reCAPTCHA v3 API Einstellungen
 $secretKey = '6LdZLiQrAAAAAOW87kWekFUxEb-cvbQpCVhocsJg'; // Ersetzen mit deinem Secret Key
 
@@ -7,7 +16,7 @@ $valErr = $statusMsg = $api_error = '';
 $status = 'error';
 
 // Wenn das Formular abgeschickt wurde
-if(isset($_POST['submit_frm'])) {
+if(isset($_POST['loginForm'])) {
     // Formulardaten abrufen
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
@@ -71,18 +80,21 @@ if(isset($_POST['submit_frm'])) {
                     
                     // Beispiel: Simulierte erfolgreiche Anmeldung
                     $status = 'success';
-                    
+                    console_log($score);
+
                     // Hier könntest du Session starten, Benutzer in Datenbank suchen usw.
                     // session_start();
                     // $_SESSION['user_id'] = $user_id;
                     
                     // Weiterleitung zur Hauptseite nach erfolgreichem Login
-                    header("Location: ./Homescreen/Bewerbung/bewerbung.html");
+                    header("Location: ./Homescreen/Main%20Screen/Main.html");
                     exit();
                 } else {
                     // Score ist zu niedrig - wahrscheinlich ein Bot
                     $statusMsg = 'Die Sicherheitsüberprüfung wurde nicht bestanden. Bitte versuche es später erneut.';
+                    console_log($score);
                 }
+
             } else {
                 $statusMsg = !empty($api_error) ? $api_error : 'Die reCAPTCHA-Überprüfung ist fehlgeschlagen, bitte versuche es erneut.';
             }

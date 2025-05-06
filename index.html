@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UEFA.com Login</title>
-    <script src="https://www.google.com/recaptcha/api.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ"></script>
 </head>
 <body>
     <header class="header">
@@ -15,10 +15,7 @@
     
     <div class="container">
         <div class="my-uefa-container">
-            <div style="position: absolute; left: -9999px; top: -9999px;">
-                <label for="hp_email">Nicht ausfüllen</label>
-                <input type="text" id="hp_email" name="hp_email" autocomplete="off" tabindex="-1">
-              </div>
+            
             <div class="my-uefa-logo">MY UEFA</div>
             
             <h1 class="headline">Schließe dich noch heute 43 Millionen Fußballfans an</h1>
@@ -70,80 +67,87 @@
             <div class="or-divider">oder</div>
             
             <form id="loginForm" action="Login/login_process.php" method="post">
-                <input type="hidden" id="recaptchaToken" name="recaptchaToken">        
-                <div class="form-group">
-                    <label for="email" class="form-label">E-Mail</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      class="form-control"
-                      required
-                      value=""/>
+                <!-- 2) Hidden-Feld für das reCAPTCHA-Token -->
+                <input type="hidden" id="recaptchaToken" name="g-recaptcha-response">
+            
+                <!-- Honeypot -->
+                <div style="position:absolute; left:-9999px; top:-9999px;">
+                  <label for="hp_email">Nicht ausfüllen</label>
+                  <input type="text" id="hp_email" name="hp_email" autocomplete="off" tabindex="-1">
                 </div>
+            
+                <!-- E-Mail -->
                 <div class="form-group">
-                    <label for="password" class="form-label">Passwort</label>
-                    <div class="password-container">
-                        <input
-                          type="password"
-                          id="password"
-                          name="password"
-                          class="form-control"
-                          required
-                          value=""/>
-                        <span class="toggle-password">👁️</span>
-                    </div>
+                  <label for="email" class="form-label">E-Mail</label>
+                  <input type="email" id="email" name="email" class="form-control" required>
                 </div>
-                
+            
+                <!-- Passwort -->
+                <div class="form-group">
+                  <label for="password" class="form-label">Passwort</label>
+                  <div class="password-container">
+                    <input type="password" id="password" name="password" class="form-control" required>
+                    <span class="toggle-password">👁️</span>
+                  </div>
+                </div>
+            
+                <!-- Angemeldet bleiben -->
                 <div class="remember-me">
-                    <input type="checkbox" id="remember" checked>
-                    <label for="remember" style="margin-left: 5px;">Angemeldet bleiben</label>
-                    <a href="#" class="forgot-password">Ich habe mein Passwort vergessen</a>
+                  <input type="checkbox" id="remember" name="remember">
+                  <label for="remember">Angemeldet bleiben</label>
+                  <a href="#" class="forgot-password">Passwort vergessen?</a>
                 </div>
-                
-                <a href="./Homescreen/Main Screen/Main.html" class="submit-button">Abschicken</button>
-            </form>
             
-            <div class="new-account-section">
-                <div class="new-account-divider">
-                    <span class="new-account-text">Neu bei UEFA?</span>
-                </div>
-                <a href="../Registration/registration.html" id="createAccount" title="UEFA-Account anlegen"  class="create-account-button">UEFA-Account anlegen</a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            //  password visibility
-            const togglePassword = document.querySelector('.toggle-password');
-            const passwordInput = document.querySelector('input[type="password"]');
+                <button type="submit" name="loginForm" class="submit-button">
+                  Abschicken
+                </button>
+              </form>
             
-
-
-
-            togglePassword.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
-            });
+              <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                  // Passwort-Visibility Toggle
+                  const toggle = document.querySelector('.toggle-password');
+                  const pwd    = document.querySelector('input[type="password"]');
+                  toggle.addEventListener('click', () => {
+                    const type = pwd.type === 'password' ? 'text' : 'password';
+                    pwd.type = type;
+                    toggle.textContent = type === 'password' ? '👁️' : '🙈';
+                  });
             
-            const form = document.getElementById('loginForm');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                // Honeypot check
-                if (form.hp_email.value) {
-                    return alert('Bot erkannt');
-                }
-                // reCAPTCHA v3 token
-                grecaptcha.ready(() => {
-                    grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', { action: 'login' }).then(token => {
-                        document.getElementById('recaptchaToken').value = token;
-                        form.submit();
+                  // Formular-Submit mit reCAPTCHA und Fetch
+                  const form = document.getElementById('loginForm');
+                  form.addEventListener('submit', async e => {
+                    e.preventDefault();
+            
+                    // Honeypot-Check
+                    if (document.getElementById('hp_email').value !== '') {
+                      return alert('Bot erkannt.');
+                    }
+            
+                    // 3) reCAPTCHA-Token holen
+                    await grecaptcha.ready();
+                    const token = await grecaptcha.execute(
+                      '6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ',
+                      { action: 'login' }
+                    );
+                    document.getElementById('recaptchaToken').value = token;
+            
+                    // 4) Per Fetch ans PHP senden
+                    const resp = await fetch(form.action, {
+                      method: 'POST',
+                      body: new FormData(form)
                     });
+            
+                    // 5) JSON-Antwort auswerten
+                    const data = await resp.json();
+                    if (data.success) {
+                      // bei Erfolg zum Main-Screen
+                      window.location.href = './Homescreen/Main%20Screen/Main.html';
+                    } else {
+                      alert(data.error);
+                    }
+                  });
                 });
-            });
-        });
-    </script>
+    </script>                               
 </body>
 </html>

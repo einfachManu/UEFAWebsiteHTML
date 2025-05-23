@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <link rel="stylesheet" href="./Login/login.css"/>
+    <link rel="stylesheet" href="./login.css"/>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UEFA.com Login</title>
@@ -110,10 +110,15 @@
                 <input type="hidden" name="recaptcha_token" id="recaptcha_token">
                 
              
-                <button type="button" class="submit-button g-recaptcha" 
-                    data-sitekey="6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ" 
-                    data-callback="onSubmit" 
-                    data-action="submit">Abschicken</button>
+                <button 
+                    type="submit"
+                    class="submit-button g-recaptcha"
+                    data-sitekey="6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ"
+                    data-callback="onSubmit"
+                    data-action="submit">
+                    Abschicken
+                </button>
+
             </form>
             
             <!-- Registrierung -->
@@ -128,10 +133,15 @@
     <script src="https://www.google.com/recaptcha/api.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ"></script>
     <script>
         grecaptcha.ready(function() {
-            grecaptcha.execute('6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ', {action: 'login'}).then(function(token) {
-                document.getElementById('recaptcha_token').value = token;
+        grecaptcha.execute('EUER_SITE_KEY', { action: 'login' })
+            .then(function(token) {
+            document.getElementById('recaptcha_token').value = token;
+            })
+            .catch(function(err) {
+            console.error('reCAPTCHA fehlgeschlagen:', err);
             });
         });
+
         function onSubmit(token) {
             // Token ins versteckte Feld übertragen
             
@@ -143,8 +153,8 @@
                 document.getElementById('statusMsg').className = 'status-msg error';
                 return;
             }
+            window.location.href = '../Registration/registration.html';
             
-            // Formular absenden
             
         }
         

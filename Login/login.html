@@ -10,7 +10,7 @@
     1) reCAPTCHA v3 Enterprise–Skript einbinden 
     Ersetze hier bitte "YOUR_SITE_KEY" durch deinen echten Site-Key.
   -->
-  <script src="https://www.google.com/recaptcha/enterprise.js?render=YOUR_SITE_KEY"></script>
+  <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ"></script>
 </head>
 <body>
   <header class="header">
@@ -170,7 +170,7 @@
         // reCAPTCHA v3 Enterprise ausführen
         grecaptcha.enterprise.ready(function () {
           grecaptcha.enterprise
-            .execute("YOUR_SITE_KEY", { action: "login" })
+            .execute("4", { action: "login" })
             .then(function (token) {
               // Token in verstecktes Feld schreiben
               recaptchaTokenInput.value = token;

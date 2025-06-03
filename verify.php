@@ -6,7 +6,7 @@ use Google\Cloud\RecaptchaEnterprise\V1\Assessment;
 use Google\Cloud\RecaptchaEnterprise\V1\TokenProperties;
 
 // Das hier sind die Werte, die vom Frontend kommen:
-$recaptchaSiteKey    = 'YOUR_SITE_KEY';      // derselbe Key wie im <script>-Tag
+$recaptchaSiteKey    = '6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ';      // derselbe Key wie im <script>-Tag
 $recaptchaAction     = 'login';              // gleiche Action wie beim JS-Aufruf
 $recaptchaToken      = $_POST['recaptcha_token'] ?? '';
 $projectId           = 'my-project-3722-1745570823170'; // dein Google Cloud Projekt

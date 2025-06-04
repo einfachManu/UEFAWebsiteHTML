@@ -3,68 +3,91 @@ require 'vendor/autoload.php';
 use Google\Cloud\RecaptchaEnterprise\V1\RecaptchaEnterpriseServiceClient;
 use Google\Cloud\RecaptchaEnterprise\V1\Event;
 use Google\Cloud\RecaptchaEnterprise\V1\Assessment;
-use Google\Cloud\RecaptchaEnterprise\V1\TokenProperties;
+use Google\Cloud\RecaptchaEnterprise\V1\CreateAssessmentRequest;
 
-// Das hier sind die Werte, die vom Frontend kommen:
-$recaptchaSiteKey    = '6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ';      // derselbe Key wie im <script>-Tag
-$recaptchaAction     = 'login';              // gleiche Action wie beim JS-Aufruf
-$recaptchaToken      = $_POST['recaptcha_token'] ?? '';
-$projectId           = 'my-project-3722-1745570823170'; // dein Google Cloud Projekt
+// 1) Empfange das reCAPTCHA-Token und die restlichen Login-Daten aus POST
+$token             = $_POST['recaptcha_token'] ?? '';
+$email             = $_POST['email'] ?? '';
+$password          = $_POST['password'] ?? '';
+$projectId         = 'umemfma.com';
+$recaptchaSiteKey  = '6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ';
+$expectedAction    = 'login';
 
-if (empty($recaptchaToken)) {
-    die('Kein reCAPTCHA-Token erhalten.');
+// 2) Token da? Wenn nicht → sofort abbrechen
+if (!$token) {
+    die('reCAPTCHA-Token fehlt.');
 }
 
-// reCAPTCHA-Client initialisieren
-$client = new RecaptchaEnterpriseServiceClient();
+// 3) Client initialisieren und Assessment anlegen
+$client      = new RecaptchaEnterpriseServiceClient();
 $projectName = $client->projectName($projectId);
 
-// Event für die Aktion „login“ erstellen
 $event = (new Event())
     ->setSiteKey($recaptchaSiteKey)
-    ->setToken($recaptchaToken)
-    ->setExpectedAction($recaptchaAction);
+    ->setToken($token)
+    ->setExpectedAction($expectedAction);
 
-// Assessment anlegen
-$assessment = (new Assessment())
-    ->setEvent($event);
-
-$request = (new \Google\Cloud\RecaptchaEnterprise\V1\CreateAssessmentRequest())
+$assessment = (new Assessment())->setEvent($event);
+$request    = (new CreateAssessmentRequest())
     ->setParent($projectName)
     ->setAssessment($assessment);
 
 try {
     $response = $client->createAssessment($request);
-
-    // Token validieren
-    $tokenProps = $response->getTokenProperties();
-    if (!$tokenProps->getValid()) {
-        printf("Ungültiges Token: %s\n", $tokenProps->getInvalidReason());
-        exit;
-    }
-
-    // Action prüfen
-    if ($tokenProps->getAction() !== $recaptchaAction) {
-        printf("Ungleiche Action: erwartet '%s', erhalten '%s'\n", $recaptchaAction, $tokenProps->getAction());
-        exit;
-    }
-
-    // Risiko-Score auslesen (0.0 = vermutlich Bot, 1.0 = vermutlich Mensch)
-    $riskScore = $response->getRiskAnalysis()->getScore();
-    printf("reCAPTCHA Score: %f\n", $riskScore);
-
-    if ($riskScore < 0.5) {
-        // Hier kannst du entscheiden, ob du bei niedrigem Score Login ablehnst
-        die("Zu niedriger reCAPTCHA Score, bitte erneut versuchen.");
-    }
-
-    // Wenn alles passt: Nutzer einloggen / Session erzeugen / etc.
-    // Zum Beispiel:
-    // 1. E-Mail und Passwort aus $_POST prüfen
-    // 2. Wenn korrekt: session_start(); $_SESSION['user_id'] = ...;
-
-    echo "Login erfolgreich!";
 } catch (Exception $e) {
-    printf("Fehler bei createAssessment(): %s\n", $e->getMessage());
+    die('reCAPTCHA-API-Fehler: ' . $e->getMessage());
+}
+
+// 4) Antworten auslesen
+$tokenProps   = $response->getTokenProperties();
+$riskAnalysis = $response->getRiskAnalysis();
+
+$valid           = $tokenProps->getValid();
+$returnedAction  = $tokenProps->getAction();
+$invalidReason   = $tokenProps->getInvalidReason();
+$score           = $riskAnalysis->getScore();
+$reasons         = $riskAnalysis->getReasons(); // Array mit Grund-Codes, falls vorhanden
+$userIpAddress   = $_SERVER['REMOTE_ADDR'];    // Optionale Speicherung für Logs
+
+// 5) Loggen – immer in DB oder Datei protokollieren
+// In der Praxis: INSERT INTO recaptcha_logs (email, ip, score, valid, action, invalidReason, reasons, time)
+// VALUES (...);
+// Hier nur ein kurzes Beispiel im Error-Log:
+error_log(sprintf(
+    "[reCAPTCHA-Log] E-Mail=%s, IP=%s, valid=%s, action=%s, score=%.2f, reasons=%s",
+    $email,
+    $userIpAddress,
+    $valid ? 'true' : 'false',
+    $returnedAction,
+    $score,
+    implode(',', $reasons)
+));
+
+// 6) Validität prüfen
+if (!$valid) {
+    die('reCAPTCHA ungültig: ' . $invalidReason);
+}
+
+// 7) Action checken
+if ($returnedAction !== $expectedAction) {
+    die('reCAPTCHA-Action stimmt nicht überein.');
+}
+
+// 8) Score auswerten und Gegenmaßnahmen
+if ($score >= 1.0) {
+    session_start();
+    $_SESSION['user_email'] = $email;
+    header('Location: dashboard.php');
     exit;
 }
+
+?>
+<form id="redirectForm" action="recaptcha_v2.php" method="POST" style="display:none;">
+  <input type="hidden" name="email" value="<?= htmlspecialchars($email); ?>" />
+  <input type="hidden" name="password" value="<?= htmlspecialchars($password); ?>" />
+  <!-- Du könntest hier auch per Session speichern statt im versteckten Feld -->
+</form>
+<script>
+  // Automatisch Formular absenden, um E-Mail/Passwort an recaptcha_v2.php zu übergeben
+  document.getElementById('redirectForm').submit();
+</script>

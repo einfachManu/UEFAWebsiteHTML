@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <link rel="stylesheet" href="index.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function onSubmit(token) {
+            document.getElementById("login-form").submit();
+        }
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Anmelden</h1>
+            <p>Willkommen zurück! Bitte melden Sie sich an.</p>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">E-Mail oder Benutzername</label>
+                <input type="text" id="email" name="email" placeholder="ihre.email@beispiel.de" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Passwort</label>
+                <input type="password" id="password" name="password" placeholder="Ihr Passwort" required>
+            </div>
+
+            <button 
+                type="submit" 
+                class="login-btn"
+                data-sitekey ="6LdZLiQrAAAAAGozk6jDs0KOKhgH2kAQ4ZxE-mOZ"
+                data-callback="onSubmit"
+                data-action="login"
+            >Anmelden</button>
+        </form>
+
+        <div class="forgot-password">
+            <a href="#">Passwort vergessen?</a>
+        </div>
+
+        <div class="divider">
+            <span>oder</span>
+        </div>
+
+        <div class="social-login">
+            <button class="social-btn">Google</button>
+            <button class="social-btn">Facebook</button>
+        </div>
+
+        <div class="signup-link">
+            Noch kein Konto? <a href="#">Hier registrieren</a>
+        </div>
+    </div>
+</body>
+</html>
